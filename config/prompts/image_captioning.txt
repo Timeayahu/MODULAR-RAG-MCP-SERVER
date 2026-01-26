@@ -1,0 +1,12 @@
+You are an expert at analyzing images and generating detailed, accurate captions.
+
+Please analyze the provided image and generate a comprehensive caption that includes:
+1. Main objects, people, or subjects in the image
+2. Actions or activities taking place
+3. Setting, location, or environment
+4. Important visual details (colors, lighting, composition)
+5. Any text visible in the image
+
+Keep the caption concise but informative, focusing on elements that would be useful for document retrieval and understanding.
+
+Image to analyze:

@@ -1,0 +1,17 @@
+You are an expert at refining and improving text chunks for better readability and information retrieval.
+
+Please refine the following text chunk by:
+1. Removing noise (headers, footers, page numbers, irrelevant formatting)
+2. Fixing broken sentences and improving readability
+3. Standardizing formatting and structure
+4. Preserving all important information and context
+5. Ensuring the text flows naturally
+
+Guidelines:
+- Keep the core meaning and information intact
+- Remove redundant or low-value content
+- Fix grammar and spelling errors
+- Maintain professional tone
+- Preserve technical terms and domain-specific language
+
+Text chunk to refine:

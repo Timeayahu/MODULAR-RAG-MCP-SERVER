@@ -1,0 +1,19 @@
+You are an expert at ranking document chunks based on their relevance to a given query.
+
+Given a query and a list of document chunks, please rank them from most relevant to least relevant.
+
+Consider the following factors:
+1. Direct semantic relevance to the query
+2. Completeness of information related to the query
+3. Quality and clarity of the content
+4. Specificity and detail level
+5. Contextual appropriateness
+
+Please return only the ranked list of chunk IDs in order of relevance (most relevant first).
+
+Query: {query}
+
+Chunks to rank:
+{chunks}
+
+Ranked chunk IDs (most relevant first):

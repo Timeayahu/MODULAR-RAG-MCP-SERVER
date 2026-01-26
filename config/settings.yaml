@@ -1,0 +1,69 @@
+# Modular RAG MCP Server 配置文件
+
+# LLM 配置
+llm:
+  provider: "openai"  # openai, azure, ollama, deepseek
+  model: "gpt-4o-mini"
+  api_key: "${OPENAI_API_KEY}"
+  base_url: null
+  max_tokens: 4000
+  temperature: 0.1
+
+# Embedding 配置  
+embedding:
+  provider: "openai"  # openai, local
+  model: "text-embedding-3-small"
+  api_key: "${OPENAI_API_KEY}"
+  base_url: null
+  dimensions: 1536
+  batch_size: 100
+
+# 向量数据库配置
+vector_store:
+  provider: "chroma"  # chroma, qdrant, weaviate
+  host: "localhost"
+  port: 8000
+  collection_name: "knowledge_base"
+  persist_directory: "data/db/chroma"
+
+# 检索配置
+retrieval:
+  dense:
+    top_k: 20
+    score_threshold: 0.7
+  sparse:
+    top_k: 20
+    score_threshold: 0.5
+  fusion:
+    method: "rrf"  # rrf, weighted
+    rrf_k: 60
+  final_top_k: 10
+
+# 重排序配置
+rerank:
+  enabled: true
+  backend: "none"  # none, cross_encoder, llm
+  model: null
+  top_k: 5
+  score_threshold: 0.8
+
+# 评估配置
+evaluation:
+  enabled: false
+  backend: "custom"  # custom, ragas
+  metrics: ["hit_rate", "mrr", "ndcg"]
+  golden_set_path: "tests/fixtures/golden_test_set.json"
+
+# 可观测性配置
+observability:
+  logging:
+    level: "INFO"
+    format: "json"
+    file: "logs/app.log"
+  tracing:
+    enabled: true
+    file: "logs/traces.jsonl"
+  dashboard:
+    enabled: false
+    host: "localhost"
+    port: 8501
