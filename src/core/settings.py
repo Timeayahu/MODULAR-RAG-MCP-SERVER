@@ -46,7 +46,7 @@ class VectorStoreConfig:
 @dataclass
 class RetrievalConfig:
     """检索配置"""
-    dense: Dict[str, Any] = field(default_factory=lambda: {
+    dense: Dict[str, Any] = field(default_factory=lambda: {#field避免了可变参数的共享陷阱
         "top_k": 20,
         "score_threshold": 0.7
     })
@@ -124,6 +124,15 @@ def _expand_env_vars(data: Any) -> Any:
         return data
 
 
+def _require_field(data: Dict[str, Any], key: str, path: str) -> None:
+    """检查必填字段是否存在且非空。"""
+    if key not in data:
+        raise ValueError(f"缺少必填字段: {path}")
+    value = data.get(key)
+    if value is None or (isinstance(value, str) and not value.strip()):
+        raise ValueError(f"{path} 不能为空")
+
+
 def load_settings(config_path: str) -> Settings:
     """
     加载配置文件
@@ -152,6 +161,26 @@ def load_settings(config_path: str) -> Settings:
     config_data = _expand_env_vars(raw_config)
     
     try:
+        # 顶层必填字段校验（明确字段路径）
+        required_top = [
+            "llm",
+            "embedding",
+            "vector_store",
+            "retrieval",
+            "rerank",
+            "evaluation",
+            "observability",
+        ]
+        for key in required_top:
+            _require_field(config_data, key, key)
+
+        # 子字段必填校验
+        _require_field(config_data["llm"], "provider", "llm.provider")
+        _require_field(config_data["llm"], "model", "llm.model")
+        _require_field(config_data["embedding"], "provider", "embedding.provider")
+        _require_field(config_data["embedding"], "model", "embedding.model")
+        _require_field(config_data["vector_store"], "provider", "vector_store.provider")
+
         # 构建配置对象
         settings = Settings(
             llm=LLMConfig(**config_data['llm']),

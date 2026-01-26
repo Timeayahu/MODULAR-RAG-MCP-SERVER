@@ -8,7 +8,7 @@ import logging
 import sys
 from typing import Optional
 
-
+#单例模式，只有一个logger对象，用来管理全局
 def get_logger(name: str, level: str = "INFO") -> logging.Logger:
     """
     获取配置好的日志器
