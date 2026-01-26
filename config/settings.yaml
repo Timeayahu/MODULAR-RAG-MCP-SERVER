@@ -18,6 +18,13 @@ embedding:
   dimensions: 1536
   batch_size: 100
 
+# Splitter 配置
+splitter:
+  provider: "recursive"  # recursive, semantic, fixed
+  chunk_size: 1000
+  chunk_overlap: 100
+  separators: null
+
 # 向量数据库配置
 vector_store:
   provider: "chroma"  # chroma, qdrant, weaviate

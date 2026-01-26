@@ -34,6 +34,15 @@ class EmbeddingConfig:
 
 
 @dataclass
+class SplitterConfig:
+    """Splitter 配置"""
+    provider: str
+    chunk_size: int = 1000
+    chunk_overlap: int = 100
+    separators: Optional[list[str]] = None
+
+
+@dataclass
 class VectorStoreConfig:
     """向量数据库配置"""
     provider: str
@@ -104,6 +113,7 @@ class Settings:
     """主配置类"""
     llm: LLMConfig
     embedding: EmbeddingConfig
+    splitter: SplitterConfig
     vector_store: VectorStoreConfig
     retrieval: RetrievalConfig
     rerank: RerankConfig
@@ -165,6 +175,7 @@ def load_settings(config_path: str) -> Settings:
         required_top = [
             "llm",
             "embedding",
+            "splitter",
             "vector_store",
             "retrieval",
             "rerank",
@@ -179,12 +190,14 @@ def load_settings(config_path: str) -> Settings:
         _require_field(config_data["llm"], "model", "llm.model")
         _require_field(config_data["embedding"], "provider", "embedding.provider")
         _require_field(config_data["embedding"], "model", "embedding.model")
+        _require_field(config_data["splitter"], "provider", "splitter.provider")
         _require_field(config_data["vector_store"], "provider", "vector_store.provider")
 
         # 构建配置对象
         settings = Settings(
             llm=LLMConfig(**config_data['llm']),
             embedding=EmbeddingConfig(**config_data['embedding']),
+            splitter=SplitterConfig(**config_data['splitter']),
             vector_store=VectorStoreConfig(**config_data['vector_store']),
             retrieval=RetrievalConfig(**config_data['retrieval']),
             rerank=RerankConfig(**config_data['rerank']),
@@ -223,6 +236,14 @@ def validate_settings(settings: Settings) -> None:
     if not settings.embedding.model:
         raise ValueError("embedding.model 不能为空")
     
+    # 校验 Splitter 配置
+    if not settings.splitter.provider:
+        raise ValueError("splitter.provider 不能为空")
+    if settings.splitter.chunk_size <= 0:
+        raise ValueError("splitter.chunk_size 必须大于 0")
+    if settings.splitter.chunk_overlap < 0:
+        raise ValueError("splitter.chunk_overlap 不能为负数")
+
     # 校验 VectorStore 配置
     if not settings.vector_store.provider:
         raise ValueError("vector_store.provider 不能为空")

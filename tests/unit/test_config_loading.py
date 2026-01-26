@@ -25,6 +25,7 @@ def test_load_settings_missing_field(tmp_path: Path):
     config_data = {
         "llm": {"provider": "openai", "model": "gpt-4o-mini"},
         "embedding": {"model": "text-embedding-3-small"},
+        "splitter": {"provider": "recursive"},
         "vector_store": {"provider": "chroma"},
         "retrieval": {},
         "rerank": {},
