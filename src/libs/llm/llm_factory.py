@@ -4,12 +4,21 @@ from typing import Dict, Type
 
 from core.settings import Settings
 from libs.llm.base_llm import BaseLLM
+from libs.llm.azure_llm import AzureLLM
+from libs.llm.deepseek_llm import DeepSeekLLM
+from libs.llm.ollama_llm import OllamaLLM
+from libs.llm.openai_llm import OpenAILLM
 
 
 class LLMFactory:
     """LLM 工厂，按 provider 路由到具体实现。"""
 
-    _registry: Dict[str, Type[BaseLLM]] = {}
+    _registry: Dict[str, Type[BaseLLM]] = {
+        "openai": OpenAILLM,
+        "azure": AzureLLM,
+        "deepseek": DeepSeekLLM,
+        "ollama": OllamaLLM,
+    }
 
     @classmethod
     def register(cls, provider: str, llm_cls: Type[BaseLLM]) -> None:
