@@ -81,6 +81,16 @@ class RerankConfig:
 
 
 @dataclass
+class TransformConfig:
+    """转换/增强配置"""
+    refine_enabled: bool = True
+    refine_use_llm: bool = False
+    enrich_metadata: bool = True
+    enrich_use_llm: bool = False
+    image_captioning: bool = False
+
+
+@dataclass
 class EvaluationConfig:
     """评估配置"""
     enabled: bool = False
@@ -114,6 +124,7 @@ class Settings:
     llm: LLMConfig
     embedding: EmbeddingConfig
     splitter: SplitterConfig
+    transform: TransformConfig
     vector_store: VectorStoreConfig
     retrieval: RetrievalConfig
     rerank: RerankConfig
@@ -198,6 +209,7 @@ def load_settings(config_path: str) -> Settings:
             llm=LLMConfig(**config_data['llm']),
             embedding=EmbeddingConfig(**config_data['embedding']),
             splitter=SplitterConfig(**config_data['splitter']),
+            transform=TransformConfig(**config_data.get('transform', {})),
             vector_store=VectorStoreConfig(**config_data['vector_store']),
             retrieval=RetrievalConfig(**config_data['retrieval']),
             rerank=RerankConfig(**config_data['rerank']),

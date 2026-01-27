@@ -1667,12 +1667,12 @@ observability:
 
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
-| C1 | 定义核心数据模型（Document/Chunk/Record） | [ ] | - | |
-| C2 | 文件完整性检查（SHA256） | [ ] | - | |
-| C3 | Loader 抽象基类与 PDF Loader | [ ] | - | |
-| C4 | Splitter 集成（调用 Libs） | [ ] | - | |
-| C5 | Transform 基类 + ChunkRefiner | [ ] | - | |
-| C6 | MetadataEnricher | [ ] | - | |
+| C1 | 定义核心数据模型（Document/Chunk/Record） | [x] | 2026-01-27 | |
+| C2 | 文件完整性检查（SHA256） | [x] | 2026-01-27 | |
+| C3 | Loader 抽象基类与 PDF Loader | [x] | 2026-01-27 | |
+| C4 | Splitter 集成（调用 Libs） | [x] | 2026-01-27 | |
+| C5 | Transform 基类 + ChunkRefiner | [x] | 2026-01-27 | |
+| C6 | MetadataEnricher | [x] | 2026-01-27 | |
 | C7 | ImageCaptioner | [ ] | - | |
 | C8 | DenseEncoder | [ ] | - | |
 | C9 | SparseEncoder | [ ] | - | |
@@ -1733,7 +1733,7 @@ observability:
 |------|---------|--------|------|
 | 阶段 A | 3 | 0 | 0% |
 | 阶段 B | 14 | 0 | 0% |
-| 阶段 C | 15 | 0 | 0% |
+| 阶段 C | 15 | 6 | 40% |
 | 阶段 D | 7 | 0 | 0% |
 | 阶段 E | 6 | 0 | 0% |
 | 阶段 F | 5 | 0 | 0% |
