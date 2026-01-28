@@ -1674,13 +1674,13 @@ observability:
 | C5 | Transform 基类 + ChunkRefiner | [x] | 2026-01-27 | |
 | C6 | MetadataEnricher | [x] | 2026-01-27 | |
 | C7 | ImageCaptioner | [x] | 2026-01-28 | |
-| C8 | DenseEncoder | [ ] | - | |
-| C9 | SparseEncoder | [ ] | - | |
-| C10 | BatchProcessor | [ ] | - | |
-| C11 | VectorUpserter | [ ] | - | |
-| C12 | BM25Indexer | [ ] | - | |
-| C13 | ImageStorage | [ ] | - | |
-| C14 | Pipeline 编排（MVP 串起来） | [ ] | - | |
+| C8 | DenseEncoder | [x] | 2026-01-28 | |
+| C9 | SparseEncoder | [x] | 2026-01-28 | |
+| C10 | BatchProcessor | [x] | 2026-01-28 | |
+| C11 | VectorUpserter | [x] | 2026-01-28 | |
+| C12 | BM25Indexer | [x] | 2026-01-28 | |
+| C13 | ImageStorage | [x] | 2026-01-28 | |
+| C14 | Pipeline 编排（MVP 串起来） | [x] | 2026-01-28 | |
 | C15 | 脚本入口 ingest.py | [ ] | - | |
 
 #### 阶段 D：Retrieval MVP
@@ -1733,12 +1733,12 @@ observability:
 |------|---------|--------|------|
 | 阶段 A | 3 | 3 | 100% |
 | 阶段 B | 14 | 14 | 100% |
-| 阶段 C | 15 | 7 | 47% |
+| 阶段 C | 15 | 14 | 93% |
 | 阶段 D | 7 | 0 | 0% |
 | 阶段 E | 6 | 0 | 0% |
 | 阶段 F | 5 | 0 | 0% |
 | 阶段 G | 4 | 0 | 0% |
-| **总计** | **54** | **24** | **44%** |
+| **总计** | **54** | **31** | **57%** |
 
 
 ---
