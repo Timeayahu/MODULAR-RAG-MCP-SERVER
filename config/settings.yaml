@@ -25,6 +25,13 @@ splitter:
   chunk_overlap: 100
   separators: null
 
+# Transform 配置
+transform:
+  refine_enabled: true
+  refine_use_llm: false
+  enrich_metadata: true
+  image_captioning: false
+
 # 向量数据库配置
 vector_store:
   provider: "chroma"  # chroma, qdrant, weaviate

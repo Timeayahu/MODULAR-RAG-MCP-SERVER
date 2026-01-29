@@ -123,9 +123,9 @@ def main():
         logger.warning("没有文件需要处理。")
         sys.exit(0)
 
-    # 创建 Ingestion Pipeline
+    # 创建 Ingestion Pipeline（按集合名称初始化）
     try:
-        pipeline = IngestionPipeline(settings)
+        pipeline = IngestionPipeline(settings, collection=args.collection)
     except Exception as e:
         logger.error(f"创建 Pipeline 失败: {e}")
         sys.exit(1)
@@ -139,7 +139,8 @@ def main():
     for i, file_path in enumerate(files, 1):
         logger.info(f"[{i}/{total_files}] 处理文件: {file_path}")
         try:
-            result = pipeline.run(file_path, collection_name=args.collection, force=args.force)
+            # IngestionPipeline.run 只接受 path 和 force 参数
+            result = pipeline.run(str(file_path), force=args.force)
 
             if result.get("skipped"):
                 logger.info(f"文件 {file_path.name} 未变更，已跳过。")

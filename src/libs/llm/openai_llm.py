@@ -1,89 +1,92 @@
-"""OpenAI-Compatible LLM 实现。"""
+"""OpenAI LLM 实现，基于 LlamaIndex OpenAI 适配器。
 
-import json
-import urllib.error
-import urllib.request
-from typing import Dict, List, Optional
-from libs.llm.base_llm import BaseLLM
+根据 DEV_SPEC 3.3.2：
+- LlamaIndex 内置了对主流 LLM Provider 的适配（OpenAI、Azure、Ollama 等）
+- 对于 LlamaIndex 未覆盖的 Provider，可通过其 OpenAI-Compatible 模式接入
+"""
+
+from typing import TYPE_CHECKING, Optional
+
+from libs.llm.base_llm import BaseLLM, LLAMA_INDEX_AVAILABLE
+
+if LLAMA_INDEX_AVAILABLE:
+    from llama_index.core.llms import LLM as LlamaLLM
+
+if TYPE_CHECKING:
+    from llama_index.core.llms import LLM as LlamaLLM
 
 
-class OpenAICompatibleLLM(BaseLLM):
-    """OpenAI-Compatible 基类，封装通用请求与解析逻辑。"""
+class OpenAILLM(BaseLLM):
+    """OpenAI LLM 实现，基于 LlamaIndex OpenAI 适配器。"""
 
     provider_name: str = "openai"
-    default_base_url: Optional[str] = "https://api.openai.com"
-    auth_header_name: str = "Authorization"
 
-    def chat(self, messages: List[Dict[str, str]]) -> str:
-        """执行对话并返回模型输出。"""
-        self._validate_messages(messages)
-        payload = {
+    def get_llama_llm(self) -> "LlamaLLM":
+        """获取 LlamaIndex OpenAI LLM 实例。"""
+        if self._llama_llm is not None:
+            return self._llama_llm
+
+        if not LLAMA_INDEX_AVAILABLE:
+            raise ImportError("llama-index-core 未安装")
+
+        try:
+            from llama_index.llms.openai import OpenAI
+        except ImportError:
+            raise ImportError(
+                "llama-index-llms-openai 未安装，请运行: pip install llama-index-llms-openai"
+            )
+
+        # 构建参数
+        kwargs = {
             "model": self.config.model,
-            "messages": messages,
+            "api_key": self.config.api_key,
             "max_tokens": self.config.max_tokens,
             "temperature": self.config.temperature,
         }
-        response = self._post(payload)
-        return self._extract_content(response)
 
-    def _post(self, payload: Dict[str, object]) -> Dict[str, object]:
-        url = self._build_url()
-        api_key = self.config.api_key
-        if self.auth_header_name and not api_key:
-            raise ValueError(f"{self.provider_name} 缺少 api_key")
+        # 可选参数
+        if self.config.base_url:
+            kwargs["api_base"] = self.config.base_url
 
-        headers = {"Content-Type": "application/json"}
-        if self.auth_header_name:
-            if self.auth_header_name.lower() == "authorization":
-                headers[self.auth_header_name] = f"Bearer {api_key}"
-            else:
-                headers[self.auth_header_name] = api_key
+        self._llama_llm = OpenAI(**kwargs)
+        return self._llama_llm
 
-        data = json.dumps(payload).encode("utf-8")
-        request = urllib.request.Request(url, data=data, headers=headers, method="POST")
+
+class OpenAICompatibleLLM(BaseLLM):
+    """OpenAI-Compatible LLM 基类，用于支持 DeepSeek 等兼容接口。
+
+    通过设置自定义 api_base 实现对 OpenAI-Compatible API 的支持。
+    """
+
+    provider_name: str = "openai_compatible"
+    default_base_url: Optional[str] = None
+
+    def get_llama_llm(self) -> "LlamaLLM":
+        """获取 LlamaIndex OpenAI LLM 实例（使用自定义 base_url）。"""
+        if self._llama_llm is not None:
+            return self._llama_llm
+
+        if not LLAMA_INDEX_AVAILABLE:
+            raise ImportError("llama-index-core 未安装")
 
         try:
-            with urllib.request.urlopen(request, timeout=30) as response:
-                raw = response.read().decode("utf-8")
-                return json.loads(raw)
-        except (urllib.error.HTTPError, urllib.error.URLError, ValueError) as exc:
-            raise ValueError(f"{self.provider_name} 请求失败: {exc}") from exc
+            from llama_index.llms.openai import OpenAI
+        except ImportError:
+            raise ImportError(
+                "llama-index-llms-openai 未安装，请运行: pip install llama-index-llms-openai"
+            )
 
-    def _build_url(self) -> str:
         base_url = self.config.base_url or self.default_base_url
         if not base_url:
             raise ValueError(f"{self.provider_name} 缺少 base_url")
-        base_url = base_url.rstrip("/")
-        if "chat/completions" in base_url:
-            return base_url
-        return f"{base_url}/v1/chat/completions"
 
-    def _validate_messages(self, messages: List[Dict[str, str]]) -> None:
-        if not isinstance(messages, list) or not messages:
-            raise ValueError(f"{self.provider_name} messages 不能为空")
-        for item in messages:
-            if not isinstance(item, dict):
-                raise ValueError(f"{self.provider_name} messages 格式错误")
-            role = item.get("role")
-            content = item.get("content")
-            if not isinstance(role, str) or not isinstance(content, str):
-                raise ValueError(f"{self.provider_name} messages 格式错误")
+        kwargs = {
+            "model": self.config.model,
+            "api_key": self.config.api_key,
+            "api_base": base_url,
+            "max_tokens": self.config.max_tokens,
+            "temperature": self.config.temperature,
+        }
 
-    def _extract_content(self, response: Dict[str, object]) -> str:
-        try:
-            choices = response.get("choices", [])
-            message = choices[0].get("message", {})
-            content = message.get("content", "")
-        except (AttributeError, IndexError):
-            content = ""
-        if not content:
-            raise ValueError(f"{self.provider_name} 返回内容为空")
-        return str(content)
-
-
-class OpenAILLM(OpenAICompatibleLLM):
-    """OpenAI 官方兼容实现。"""
-
-    provider_name = "openai"
-    default_base_url = "https://api.openai.com"
-    auth_header_name = "Authorization"
+        self._llama_llm = OpenAI(**kwargs)
+        return self._llama_llm

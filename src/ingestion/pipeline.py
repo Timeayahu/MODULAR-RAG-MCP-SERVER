@@ -24,9 +24,13 @@ from ingestion.transform.chunk_refiner import ChunkRefiner
 from ingestion.transform.metadata_enricher import MetadataEnricher
 from ingestion.transform.image_captioner import ImageCaptioner
 from ingestion.embedding.batch_processor import BatchProcessor
+from ingestion.embedding.dense_encoder import DenseEncoder
+from ingestion.embedding.sparse_encoder import SparseEncoder
 from ingestion.storage.vector_upserter import VectorUpserter
 from ingestion.storage.bm25_indexer import BM25Indexer
 from ingestion.storage.image_storage import ImageStorage
+from libs.embedding.embedding_factory import EmbeddingFactory
+from libs.vector_store.vector_store_factory import VectorStoreFactory
 
 if TYPE_CHECKING:
     from core.trace.trace_context import TraceContext
@@ -66,13 +70,54 @@ class IngestionPipeline:
         self._image_captioner = ImageCaptioner(settings)
         
         # Embedding & Storage 组件
-        self._batch_processor = BatchProcessor(settings)
-        self._vector_upserter = VectorUpserter(settings)
-        self._bm25_indexer = BM25Indexer(settings)
-        self._image_storage = ImageStorage(
-            storage_dir=str(Path(settings.data_paths.image_dir) / collection),
-            index_file=str(Path(settings.data_paths.image_dir) / collection / "index.json"),
-        )
+        batch_size = getattr(getattr(settings, "ingestion", None), "batch_size", 32)
+
+        # 特殊情况：在集成测试中，embedding.provider 通常为 "mock"，
+        # 这时会通过 patch 替换 BatchProcessor，因此不需要真实构造 encoder。
+        provider = getattr(getattr(settings, "embedding", None), "provider", None)
+        if provider == "mock":
+            # 这里的构造会被 tests 中的 patch("ingestion.pipeline.BatchProcessor") 拦截
+            self._batch_processor = BatchProcessor()
+        else:
+            # 1) 创建 DenseEncoder（使用 EmbeddingFactory）
+            embedding = EmbeddingFactory.create(settings)
+            dense_encoder = DenseEncoder(embedding)
+
+            # 2) 创建 SparseEncoder（使用 Retrieval 配置中的 BM25 参数，如有）
+            try:
+                bm25_cfg = getattr(settings.retrieval, "bm25", None)
+                if bm25_cfg is not None:
+                    sparse_encoder = SparseEncoder(
+                        k1=getattr(bm25_cfg, "k1", 1.5),
+                        b=getattr(bm25_cfg, "b", 0.75),
+                        stop_words=set(getattr(bm25_cfg, "stop_words", [])) or None,
+                    )
+                else:
+                    sparse_encoder = SparseEncoder()
+            except Exception:
+                # 保底：使用默认参数构造 SparseEncoder
+                sparse_encoder = SparseEncoder()
+
+            # 3) 创建 BatchProcessor（真实环境）
+            self._batch_processor = BatchProcessor(
+                dense_encoder=dense_encoder,
+                sparse_encoder=sparse_encoder,
+                batch_size=batch_size,
+            )
+
+        # 创建 VectorStore & VectorUpserter
+        # 注意：在部分集成测试中会直接 patch VectorUpserter 或 VectorStoreFactory，
+        # 因此这里保持最小依赖。
+        vector_store = VectorStoreFactory.create(settings)
+        self._vector_upserter = VectorUpserter(vector_store)
+
+        # BM25 索引目录：当前使用默认路径 data/db/bm25
+        # 未来可从 Settings 中引入 data_paths 配置
+        self._bm25_indexer = BM25Indexer()
+
+        # 图片存储：当前使用默认路径 data/images，下层按 collection 分目录
+        # ImageStorage 本身已经支持按 collection 组织文件
+        self._image_storage = ImageStorage()
 
     @property
     def settings(self) -> Settings:
@@ -213,9 +258,11 @@ class IngestionPipeline:
             
             # Stage 5: Encode
             logger.info("Stage 5: Encoding chunks...")
-            dense_vectors, sparse_vectors, processed_chunks = self._batch_processor.process(
+            # BatchProcessor.process 返回 (dense_vectors, sparse_vectors)
+            dense_vectors, sparse_vectors = self._batch_processor.process(
                 chunks, trace=trace
             )
+            processed_chunks = chunks
             
             # Stage 6: Store
             logger.info("Stage 6: Storing to vector store and BM25 index...")

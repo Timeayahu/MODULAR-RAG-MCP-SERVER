@@ -1,4 +1,15 @@
-"""LLM 工厂：根据配置创建对应的 LLM 实例。"""
+"""LLM 工厂：根据配置创建对应的 LLM 实例。
+
+根据 DEV_SPEC 3.3.1 设计原则：
+- 配置驱动 (Configuration-Driven)：通过统一配置文件指定各组件的具体后端
+- 工厂模式 (Factory Pattern)：使用工厂函数根据配置动态实例化对应的实现类
+
+本工厂基于 LlamaIndex LLM 抽象层，支持以下 Provider：
+- openai: OpenAI 官方 API
+- azure: Azure OpenAI
+- ollama: Ollama 本地模型
+- deepseek: DeepSeek API (OpenAI-Compatible)
+"""
 
 from typing import Dict, Type
 

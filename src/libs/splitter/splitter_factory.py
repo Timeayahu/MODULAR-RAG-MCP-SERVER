@@ -1,15 +1,29 @@
-"""Splitter 工厂：根据配置创建对应的 Splitter 实例。"""
+"""Splitter 工厂：根据配置创建对应的 Splitter 实例。
+
+根据 DEV_SPEC 3.3.3：
+- 分块是 Ingestion Pipeline 的核心环节之一
+- LlamaIndex Ingestion Pipeline 的 Splitter 环节支持可插拔设计
+- 本项目当前采用 LangChain 的 RecursiveCharacterTextSplitter 进行切分
+
+本工厂支持以下 Provider：
+- recursive: LangChain RecursiveCharacterTextSplitter（默认）
+
+架构设计上预留了切换能力，可扩展支持：
+- semantic: LlamaIndex SemanticSplitter
+- fixed: 固定长度切分器
+"""
 
 from typing import Dict, Type
 
 from core.settings import Settings
 from libs.splitter.base_splitter import BaseSplitter
+from libs.splitter.recursive_splitter import RecursiveSplitter
 
 
 class SplitterFactory:
     """Splitter 工厂，按 provider 路由到具体实现。"""
 
-    _registry: Dict[str, Type[BaseSplitter]] = {}
+    _registry: Dict[str, Type[BaseSplitter]] = {"recursive": RecursiveSplitter}
 
     @classmethod
     def register(cls, provider: str, splitter_cls: Type[BaseSplitter]) -> None:

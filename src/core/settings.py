@@ -9,6 +9,10 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 from dataclasses import dataclass, field
 import yaml
+from dotenv import load_dotenv
+
+# 自动加载 .env 文件（如果存在）
+load_dotenv()
 
 
 @dataclass

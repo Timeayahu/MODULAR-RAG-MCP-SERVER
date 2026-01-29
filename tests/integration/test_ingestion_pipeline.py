@@ -164,7 +164,7 @@ def test_ingestion_pipeline_end_to_end(
         # 为每个 chunk 生成 dense 和 sparse vectors
         dense_vectors = [[0.1, 0.2] for _ in chunks]
         sparse_vectors = [{"term": 0.5} for _ in chunks]
-        return dense_vectors, sparse_vectors, chunks
+        return dense_vectors, sparse_vectors
     mock_batch_processor.process.side_effect = mock_process
     mock_batch_processor_cls.return_value = mock_batch_processor
     
@@ -193,14 +193,20 @@ def test_ingestion_pipeline_end_to_end(
 
 @pytest.mark.integration
 @patch("ingestion.pipeline.PdfLoader")
-@patch("libs.loader.file_integrity.should_skip")
+@patch("libs.vector_store.vector_store_factory.VectorStoreFactory.create")
+@patch("ingestion.pipeline.should_skip")
 def test_ingestion_pipeline_skip_unchanged_file(
     mock_should_skip,
+    mock_vector_store_factory,
     mock_pdf_loader_cls,
     mock_settings,
     sample_document_path,
 ):
     """测试文件未变更时跳过处理。"""
+    # Mock VectorStore（避免真实依赖 chromadb）
+    mock_vector_store = MagicMock()
+    mock_vector_store_factory.return_value = mock_vector_store
+
     # Mock 文件完整性检查：文件未变更
     mock_should_skip.return_value = True
     
@@ -246,7 +252,7 @@ def test_ingestion_pipeline_force_reprocess(
         def mock_process(chunks, trace=None):
             dense_vectors = [[0.1, 0.2] for _ in chunks]
             sparse_vectors = [{"term": 0.5} for _ in chunks]
-            return dense_vectors, sparse_vectors, chunks
+            return dense_vectors, sparse_vectors
         mock_batch_processor.process.side_effect = mock_process
         mock_batch_processor_cls.return_value = mock_batch_processor
         
@@ -300,7 +306,7 @@ def test_ingestion_pipeline_bm25_index_created(
     def mock_process(chunks, trace=None):
         dense_vectors = [[0.1, 0.2] for _ in chunks]
         sparse_vectors = [{"deep": 1.0, "learning": 0.8} for _ in chunks]
-        return dense_vectors, sparse_vectors, chunks
+        return dense_vectors, sparse_vectors
     mock_batch_processor.process.side_effect = mock_process
     mock_batch_processor_cls.return_value = mock_batch_processor
     
@@ -329,8 +335,16 @@ def test_ingestion_pipeline_bm25_index_created(
 
 
 @pytest.mark.integration
-def test_ingestion_pipeline_nonexistent_file(mock_settings):
+@patch("libs.vector_store.vector_store_factory.VectorStoreFactory.create")
+def test_ingestion_pipeline_nonexistent_file(
+    mock_vector_store_factory,
+    mock_settings,
+):
     """测试文件不存在时抛出错误。"""
+    # Mock VectorStore，避免真实依赖 chromadb
+    mock_vector_store = MagicMock()
+    mock_vector_store_factory.return_value = mock_vector_store
+
     pipeline = IngestionPipeline(mock_settings, collection="test_collection")
     
     with pytest.raises(FileNotFoundError, match="文件不存在"):
@@ -339,12 +353,18 @@ def test_ingestion_pipeline_nonexistent_file(mock_settings):
 
 @pytest.mark.integration
 @patch("ingestion.pipeline.PdfLoader")
+@patch("libs.vector_store.vector_store_factory.VectorStoreFactory.create")
 def test_ingestion_pipeline_loader_error(
+    mock_vector_store_factory,
     mock_pdf_loader_cls,
     mock_settings,
     sample_document_path,
 ):
     """测试 Loader 失败时抛出清晰错误。"""
+    # Mock VectorStore，避免真实依赖 chromadb
+    mock_vector_store = MagicMock()
+    mock_vector_store_factory.return_value = mock_vector_store
+
     # Mock PdfLoader 抛出错误
     mock_loader = MagicMock()
     mock_loader.load.side_effect = Exception("PDF 解析失败")
