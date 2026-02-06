@@ -38,6 +38,7 @@ env/
 *.swo
 *~
 .DS_Store
+*.ipynb
 
 # Testing
 .pytest_cache/

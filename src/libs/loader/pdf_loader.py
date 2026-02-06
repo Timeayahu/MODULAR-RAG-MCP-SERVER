@@ -26,7 +26,6 @@ logger = logging.getLogger(__name__)
 # MarkItDown 依赖
 try:
     from markitdown import MarkItDown
-
     MARKITDOWN_AVAILABLE = True
 except ImportError:
     MARKITDOWN_AVAILABLE = False

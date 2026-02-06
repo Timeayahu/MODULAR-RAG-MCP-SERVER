@@ -169,7 +169,7 @@ class ChromaStore(BaseVectorStore):
         for idx, record_id in enumerate(ids):
             distance = dists[idx] if idx < len(dists) else None
             # Chroma 返回的是 L2 距离，转换为相似度分数
-            # 距离越小越相似，这里简单取负数作为分数
+            # 距离越小越相似，分数越高越相似，取负数让距离小的分数高
             score = -float(distance) if distance is not None else 0.0
             output.append(
                 {

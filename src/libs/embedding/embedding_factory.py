@@ -7,6 +7,7 @@
 本工厂基于 LlamaIndex Embedding 抽象层，支持以下 Provider：
 - openai: OpenAI Embedding API (text-embedding-3-small/large)
 - local: 本地 HuggingFace 模型 (BGE, Sentence-Transformers)
+- qwen: Qwen Embedding API (OpenAI-Compatible)
 - fake: 测试用固定向量
 """
 
@@ -16,6 +17,7 @@ from core.settings import Settings
 from libs.embedding.base_embedding import BaseEmbedding
 from libs.embedding.local_embedding import LocalEmbedding, FakeEmbedding
 from libs.embedding.openai_embedding import OpenAIEmbedding
+from libs.embedding.qwen_embedding import QwenEmbedding
 
 
 class EmbeddingFactory:
@@ -24,6 +26,7 @@ class EmbeddingFactory:
     _registry: Dict[str, Type[BaseEmbedding]] = {
         "openai": OpenAIEmbedding,
         "local": LocalEmbedding,
+        "qwen": QwenEmbedding,
         "fake": FakeEmbedding,
     }
 

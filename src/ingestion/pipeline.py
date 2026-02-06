@@ -70,11 +70,13 @@ class IngestionPipeline:
         self._image_captioner = ImageCaptioner(settings)
         
         # Embedding & Storage 组件
-        batch_size = getattr(getattr(settings, "ingestion", None), "batch_size", 32)
+        # 从 embedding 配置中读取 batch_size，默认 32
+        batch_size = getattr(getattr(settings, "embedding", None), "batch_size", 32)
 
         # 特殊情况：在集成测试中，embedding.provider 通常为 "mock"，
         # 这时会通过 patch 替换 BatchProcessor，因此不需要真实构造 encoder。
         provider = getattr(getattr(settings, "embedding", None), "provider", None)
+        
         if provider == "mock":
             # 这里的构造会被 tests 中的 patch("ingestion.pipeline.BatchProcessor") 拦截
             self._batch_processor = BatchProcessor()

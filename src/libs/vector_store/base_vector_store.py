@@ -118,6 +118,7 @@ class BaseVectorStore(ABC):
         """
         raise NotImplementedError
 
+
     def delete(
         self,
         ids: List[str],

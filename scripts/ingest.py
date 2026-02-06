@@ -10,7 +10,8 @@
     python scripts/ingest.py --path data/documents/sample.pdf --collection papers
 
     # 摄取整个目录
-    python scripts/ingest.py --path data/documents/papers/ --collection papers
+    python scripts/ingest.py --path data/documents/papers/DEV_SPEC.pdf --collection papers
+    python scripts/ingest.py --path data/documents/papers/rag_intro.txt --collection papers
 
     # 强制重新处理（即使文件未变更）
     python scripts/ingest.py --path data/documents/sample.pdf --force
@@ -24,19 +25,20 @@ from typing import List
 
 # 添加项目根目录到 sys.path
 project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root / "src"))
+sys.path.insert(0, str(project_root / "src")) #sys.path: 指定了 Python 解释器在遇到 import 语句时，搜索模块的目录路径顺序
 
 from core.settings import load_settings
 from ingestion.pipeline import IngestionPipeline
 
 # 配置日志
-logging.basicConfig(
+logging.basicConfig( #创建root记录器
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler(sys.stderr)],  # 日志输出到 stderr
 )
 logger = logging.getLogger(__name__)
 
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 def collect_files(path: Path) -> List[Path]:
     """收集待处理的文件。
@@ -68,6 +70,7 @@ def collect_files(path: Path) -> List[Path]:
 
 def main():
     """脚本主入口。"""
+
     parser = argparse.ArgumentParser(
         description="数据摄取脚本 - 将文档导入知识库",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -97,11 +100,19 @@ def main():
     parser.add_argument(
         "--config",
         type=str,
-        default="config/settings.yaml",
+        default=str(BASE_DIR / "config" / "settings.yaml"),
         help="配置文件路径（默认: config/settings.yaml）",
     )
-
-    args = parser.parse_args()
+    """
+    parser.parse_args返回的是一个命名空间字典
+    Namespace(
+    path="./docs",
+    collection="default",  # 你设置了默认值，所以即使没传也有值
+    force=True,            # 因为传了 --force
+    config="my_conf.yaml"  # 捕获到了用户输入的值
+)
+    """
+    args = parser.parse_args() #
 
     # 加载配置
     try:

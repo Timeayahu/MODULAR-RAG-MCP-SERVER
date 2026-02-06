@@ -9,6 +9,7 @@
 - azure: Azure OpenAI
 - ollama: Ollama 本地模型
 - deepseek: DeepSeek API (OpenAI-Compatible)
+- qwen: Qwen API (DashScope)
 """
 
 from typing import Dict, Type
@@ -19,6 +20,7 @@ from libs.llm.azure_llm import AzureLLM
 from libs.llm.deepseek_llm import DeepSeekLLM
 from libs.llm.ollama_llm import OllamaLLM
 from libs.llm.openai_llm import OpenAILLM
+from libs.llm.qwen_llm import QwenLLM
 
 
 class LLMFactory:
@@ -29,6 +31,7 @@ class LLMFactory:
         "azure": AzureLLM,
         "deepseek": DeepSeekLLM,
         "ollama": OllamaLLM,
+        "qwen": QwenLLM,
     }
 
     @classmethod

@@ -2189,7 +2189,7 @@ observability:
 - **测试方法**：`pytest -q tests/unit/test_protocol_handler.py`。
 
 ### E2：实现 tool：query_knowledge_hub
-### E2：实现 tool：query_knowledge_hub### E2：实现 tool：query_knowledge_hub
+
 - **目标**：实现 `tools/query_knowledge_hub.py`：调用 query engine，返回 Markdown + structured citations。
 - **修改文件**：
   - `src/mcp_server/tools/query_knowledge_hub.py`

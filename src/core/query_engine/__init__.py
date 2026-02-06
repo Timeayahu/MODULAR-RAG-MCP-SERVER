@@ -1,5 +1,13 @@
-"""
-查询引擎模块
+"""Query Engine - 查询引擎模块。
 
-实现混合检索、结果融合、重排序等核心检索逻辑。
+负责查询处理、检索和重排序。
 """
+
+from .models import ProcessedQuery, RetrievalCandidate
+from .query_processor import QueryProcessor
+
+__all__ = [
+    "ProcessedQuery",
+    "RetrievalCandidate",
+    "QueryProcessor",
+]

@@ -2,21 +2,21 @@
 
 # LLM 配置
 llm:
-  provider: "openai"  # openai, azure, ollama, deepseek
-  model: "gpt-4o-mini"
-  api_key: "${OPENAI_API_KEY}"
-  base_url: null  # ollama 默认: http://localhost:11434
+  provider: "qwen"  # openai, azure, ollama, deepseek, qwen
+  model: "qwen-plus"  # qwen-turbo, qwen-plus, qwen-max
+  api_key: "${QWEN_API_KEY}"
+  base_url: null  # qwen provider 使用原生 DashScope API
   max_tokens: 4000
   temperature: 0.1
 
 # Embedding 配置  
 embedding:
-  provider: "openai"  # openai, local
-  model: "text-embedding-3-small"
-  api_key: "${OPENAI_API_KEY}"
-  base_url: null
+  provider: "qwen"  # openai, qwen, local
+  model: "text-embedding-v3"  # Qwen 的 embedding 模型
+  api_key: "${QWEN_API_KEY}"
+  base_url: null  # qwen provider 使用原生 DashScope API
   dimensions: 1536
-  batch_size: 100
+  batch_size: 10  # DashScope API 限制：batch_size 最大为 10
 
 # Splitter 配置
 splitter:
@@ -30,6 +30,7 @@ transform:
   refine_enabled: true
   refine_use_llm: false
   enrich_metadata: true
+  enrich_use_llm: false  # 设置为 false，避免 Qwen LLM 调用失败
   image_captioning: false
 
 # 向量数据库配置
