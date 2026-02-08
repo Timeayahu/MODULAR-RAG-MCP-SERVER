@@ -1,6 +1,8 @@
 """QueryProcessor 单元测试。
 
 测试查询预处理功能，包括关键词提取和过滤条件解析。
+
+pytest -p no:logfire tests\unit\test_query_processor.py
 """
 
 import sys
